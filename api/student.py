@@ -18,7 +18,7 @@ class Student(object):
 
     async def getStudentById(self, id):
         try:
-            response  = await requests.get(f"http://localhost:8080/api/students/getById/{id}")
+            response  =  requests.get(f"http://localhost:8080/api/students/getById/{id}")
             print(response.json())
             return response.json()
         except requests.ConnectionError as err:
@@ -26,7 +26,7 @@ class Student(object):
 
     async def deleteStudent(self, id):
         try:
-            response  = await requests.delete(f"http://localhost:8080/api/students/getById/{id}")
+            response  =  requests.delete(f"http://localhost:8080/api/students/getById/{id}")
             print(response.json())
             return response.json()
         except requests.ConnectionError as err:
@@ -40,7 +40,7 @@ class Student(object):
         }
         headers = {"Content-type": "application/json" }
         try:
-            response  = await requests.post("http://localhost:8080/api/students/create", json=payload, headers=headers)
+            response  =  requests.post("http://localhost:8080/api/students/create", json=payload, headers=headers)
             print(response.json())
             return response.json()
         except requests.ConnectionError as err:
@@ -54,7 +54,7 @@ class Student(object):
         }
         headers = {"Content-type": "application/json" }
         try:
-            response  = await requests.put(f"http://localhost:8080/api/students/update/{id}", json=payload, headers=headers)
+            response  =  requests.put(f"http://localhost:8080/api/students/update/{id}", json=payload, headers=headers)
             print(response.json())
             return response.json()
         except requests.ConnectionError as err:
