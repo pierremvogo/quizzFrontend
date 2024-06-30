@@ -26,7 +26,7 @@ class Student(object):
 
     async def deleteStudent(self, id):
         try:
-            response  =  requests.delete(f"http://localhost:8080/api/students/getById/{id}")
+            response  =  requests.delete(f"http://localhost:8080/api/students/delete/{id}")
             print(response.json())
             return response.json()
         except requests.ConnectionError as err:
