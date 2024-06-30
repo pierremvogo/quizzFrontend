@@ -2,20 +2,16 @@ import requests
 
 
 class Student(object):
-    def __init__(self):
-        self.student_number = 0
-        self.name = ""
-        self.surname = ""
-    def __init__(self, student_number, name, surname):
+    def __init__(self, student_number=0, name="", surname=""):
         self.student_number = student_number
         self.name = name
         self.surname = surname
     
     async def getStudents(self):
         try:
-            response  = await requests.get("http://localhost:8080/api/students")
+            response  =  requests.get("http://localhost:8080/api/students/get")
             print(response.json())
-            return response.json()
+            return  response.json()
         except requests.ConnectionError as err:
             print(err)
 
