@@ -59,3 +59,11 @@ class Student(object):
             return response.json()
         except requests.ConnectionError as err:
             print(err)
+
+    async def deleteAllStudent(self):
+        try:
+            response  =  requests.delete(f"http://localhost:8080/api/students/deleteAll")
+            print(response.json())
+            return response.json()
+        except requests.ConnectionError as err:
+            print(err)
