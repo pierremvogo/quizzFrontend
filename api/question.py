@@ -6,7 +6,7 @@ class Question(object):
         self.question_text = question_text
         self.quiz_id = quiz_id
     
-    async def getQuestion(self):
+    def getQuestion(self):
         try:
             response  =  requests.get("http://localhost:8080/api/questions/get")
             print(response.json())
@@ -15,7 +15,7 @@ class Question(object):
             print(err)
 
 
-    async def getQuestionById(self, id):
+    def getQuestionById(self, id):
         try:
             response  =  requests.get(f"http://localhost:8080/api/questions/getById/{id}")
             print(response.json())
@@ -23,7 +23,7 @@ class Question(object):
         except requests.ConnectionError as err:
             print(err)
 
-    async def deleteQuestion(self, id):
+    def deleteQuestion(self, id):
         try:
             response  =  requests.delete(f"http://localhost:8080/api/questions/delete/{id}")
             print(response.json())
@@ -31,7 +31,21 @@ class Question(object):
         except requests.ConnectionError as err:
             print(err)
 
-    async def createQuestion(self):
+    def getQuestionsByPagination(self,offset):
+        try:
+            response  =  requests.get(f"http://localhost:8080/api/questions/get/pagination/{offset}")
+            return  response.json()
+        except requests.ConnectionError as err:
+            print(err)
+
+    def countQuestion(self):
+        try:
+            response  =  requests.get(f"http://localhost:8080/api/questions/count")
+            return  response.json()
+        except requests.ConnectionError as err:
+            print(err)
+
+    def createQuestion(self):
         payload = {
             "question_text": self.question_text,
             'quiz_id': self.quiz_id
@@ -44,7 +58,7 @@ class Question(object):
         except requests.ConnectionError as err:
             print(err)
 
-    async def updateQuestion(self, id):
+    def updateQuestion(self, id):
         payload = {
             "question_text": self.question_text,
             'quiz_id': self.quiz_id
@@ -57,7 +71,7 @@ class Question(object):
         except requests.ConnectionError as err:
             print(err)
 
-    async def deleteAllQuestion(self):
+    def deleteAllQuestion(self):
         try:
             response  =  requests.delete(f"http://localhost:8080/api/questions/deleteAll")
             print(response.json())

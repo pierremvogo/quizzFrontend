@@ -8,7 +8,7 @@ class Answer(object):
         self.question_id = question_id
         self.student_id = student_id
     
-    async def getAnswer(self):
+    def getAnswer(self):
         try:
             response  =  requests.get("http://localhost:8080/api/answers/get")
             print(response.json())
@@ -16,8 +16,22 @@ class Answer(object):
         except requests.ConnectionError as err:
             print(err)
 
+    def getAnswersByPagination(self,offset):
+        try:
+            response  =  requests.get(f"http://localhost:8080/api/answers/get/pagination/{offset}")
+            return  response.json()
+        except requests.ConnectionError as err:
+            print(err)
 
-    async def getAnswerById(self, id):
+    def countAnswer(self):
+        try:
+            response  =  requests.get(f"http://localhost:8080/api/answers/count")
+            return  response.json()
+        except requests.ConnectionError as err:
+            print(err)
+
+
+    def getAnswerById(self, id):
         try:
             response  =  requests.get(f"http://localhost:8080/api/answers/getById/{id}")
             print(response.json())
@@ -25,7 +39,7 @@ class Answer(object):
         except requests.ConnectionError as err:
             print(err)
 
-    async def deleteAnswer(self, id):
+    def deleteAnswer(self, id):
         try:
             response  =  requests.delete(f"http://localhost:8080/api/answers/delete/{id}")
             print(response.json())
@@ -33,12 +47,11 @@ class Answer(object):
         except requests.ConnectionError as err:
             print(err)
 
-    async def createAnswer(self):
+    def createAnswer(self):
         payload = {
             "answer_text" :  self.answer_text, 
             "is_correct" :   self.is_correct,
-            "question_id" : self.question_id,
-            "student_id" : self.student_id 
+            "question_id" : self.question_id
         }
         headers = {"Content-type": "application/json" }
         try:
@@ -48,7 +61,7 @@ class Answer(object):
         except requests.ConnectionError as err:
             print(err)
 
-    async def updateAnswer(self, id):
+    def updateAnswer(self, id):
         payload = {
             "answer_text" :  self.answer_text, 
             "is_correct" :   self.is_correct,

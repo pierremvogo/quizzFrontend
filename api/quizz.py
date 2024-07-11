@@ -7,7 +7,7 @@ class Quizz(object):
         self.description = description
         self.student_id = student_id
     
-    async def getQuizz(self):
+    def getQuizz(self):
         try:
             response  =  requests.get("http://localhost:8080/api/quizzs/get")
             print(response.json())
@@ -15,8 +15,22 @@ class Quizz(object):
         except requests.ConnectionError as err:
             print(err)
 
+    def getQuizzsByPagination(self,offset):
+        try:
+            response  =  requests.get(f"http://localhost:8080/api/quizzs/get/pagination/{offset}")
+            return  response.json()
+        except requests.ConnectionError as err:
+            print(err)
 
-    async def getQuizzById(self, id):
+    def countQuizz(self):
+        try:
+            response  =  requests.get(f"http://localhost:8080/api/quizzs/count")
+            return  response.json()
+        except requests.ConnectionError as err:
+            print(err)
+
+
+    def getQuizzById(self, id):
         try:
             response  =  requests.get(f"http://localhost:8080/api/quizzs/getById/{id}")
             print(response.json())
@@ -24,7 +38,7 @@ class Quizz(object):
         except requests.ConnectionError as err:
             print(err)
 
-    async def deleteQuizz(self, id):
+    def deleteQuizz(self, id):
         try:
             response  =  requests.delete(f"http://localhost:8080/api/quizzs/delete/{id}")
             print(response.json())
@@ -32,7 +46,7 @@ class Quizz(object):
         except requests.ConnectionError as err:
             print(err)
 
-    async def createQuizz(self):
+    def createQuizz(self):
         payload = {
             "title": self.title,
             "description": self.description,
@@ -46,7 +60,7 @@ class Quizz(object):
         except requests.ConnectionError as err:
             print(err)
 
-    async def updateQuizz(self, id):
+    def updateQuizz(self, id):
         payload = {
             "title": self.title,
             "description": self.description,
@@ -60,7 +74,7 @@ class Quizz(object):
         except requests.ConnectionError as err:
             print(err)
 
-    async def deleteAllQuizz(self):
+    def deleteAllQuizz(self):
         try:
             response  =  requests.delete(f"http://localhost:8080/api/quizzs/deleteAll")
             print(response.json())
