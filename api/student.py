@@ -2,10 +2,11 @@ import requests
 
 
 class Student(object):
-    def __init__(self, student_number=0, name="", surname=""):
+    def __init__(self, student_number=0, name="", surname="", quiz_id=0):
         self.student_number = student_number
         self.name = name
         self.surname = surname
+        self.quiz_id = quiz_id
     
     def getStudents(self):
         try:
@@ -75,11 +76,25 @@ class Student(object):
         payload = {
             "student_number": self.student_number,
             "name": self.name,
-            'surname': self.surname
+            'surname': self.surname,
+            'quiz_id': self.quiz_id
         }
         headers = {"Content-type": "application/json" }
         try:
             response  =  requests.put(f"http://localhost:8080/api/students/update/{id}", json=payload, headers=headers)
+            print(response.json())
+            return response.json()
+        except requests.ConnectionError as err:
+            print(err)
+            return err
+        
+    def updateQuizStudent(self, id):
+        payload = {
+            'quiz_id': self.quiz_id
+        }
+        headers = {"Content-type": "application/json" }
+        try:
+            response  =  requests.put(f"http://localhost:8080/api/students/updateQuizId/{id}", json=payload, headers=headers)
             print(response.json())
             return response.json()
         except requests.ConnectionError as err:

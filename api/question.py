@@ -22,6 +22,14 @@ class Question(object):
             return response.json()
         except requests.ConnectionError as err:
             print(err)
+    
+    def getQuestionByQuizId(self, id):
+        try:
+            response  =  requests.get(f"http://localhost:8080/api/questions/getByQuizId/{id}")
+            print(response.json())
+            return response.json()
+        except requests.ConnectionError as err:
+            print(err)
 
     def deleteQuestion(self, id):
         try:

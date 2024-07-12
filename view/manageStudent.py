@@ -75,7 +75,7 @@ class ManageStudent:
         if  not(student_number and student_number.strip()) or not(name and name.strip()) or not(surname and surname.strip()):
             messagebox.showwarning("","Please fill up all entries")
             return
-        Student(student_number,name,surname).updateStudent(selectedItemId)
+        Student(student_number,name,surname,None).updateStudent(selectedItemId)
         for num in range(0,5):
                 self.setph('',(num))
         self.refreshTable()

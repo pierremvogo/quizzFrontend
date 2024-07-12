@@ -39,6 +39,13 @@ class Answer(object):
         except requests.ConnectionError as err:
             print(err)
 
+    def getAnswerByQuestionId(self, id):
+        try:
+            response  =  requests.get(f"http://localhost:8080/api/answers/getByQuestionId/{id}")
+            return response.json()
+        except requests.ConnectionError as err:
+            print(err)
+
     def deleteAnswer(self, id):
         try:
             response  =  requests.delete(f"http://localhost:8080/api/answers/delete/{id}")
