@@ -2,8 +2,9 @@ import requests
 
 
 class Question(object):
-    def __init__(self, question_text="", quiz_id=0):
+    def __init__(self, question_text="",question_type="", quiz_id=0):
         self.question_text = question_text
+        self.question_type = question_type
         self.quiz_id = quiz_id
     
     def getQuestion(self):
@@ -26,6 +27,14 @@ class Question(object):
     def getQuestionByQuizId(self, id):
         try:
             response  =  requests.get(f"http://localhost:8080/api/questions/getByQuizId/{id}")
+            print(response.json())
+            return response.json()
+        except requests.ConnectionError as err:
+            print(err)
+
+    def getQuestionByQuizIdAndType(self, id,type):
+        try:
+            response  =  requests.get(f"http://localhost:8080/api/questions/getByQuizIdAndType/{id}/{type}")
             print(response.json())
             return response.json()
         except requests.ConnectionError as err:
@@ -56,6 +65,7 @@ class Question(object):
     def createQuestion(self):
         payload = {
             "question_text": self.question_text,
+            "question_type": self.question_type,
             'quiz_id': self.quiz_id
         }
         headers = {"Content-type": "application/json" }
@@ -69,6 +79,7 @@ class Question(object):
     def updateQuestion(self, id):
         payload = {
             "question_text": self.question_text,
+            "question_type": self.question_type,
             'quiz_id': self.quiz_id
         }
         headers = {"Content-type": "application/json" }

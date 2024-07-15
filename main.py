@@ -19,8 +19,11 @@ from view.manageQuizz import ManageQuizz
 from view.manageStudent import ManageStudent
 
 window=tkinter.Tk()
+img = PhotoImage(file="C:/Users/pc/Documents/projetPython/frontendQuizz/view/icon.png")
+window.iconphoto(False, img)
+window.wm_iconphoto(False,img)
 window.title("Quizz App")
-window.geometry("850x560")
+window.geometry("1360x768")
 
 style=ttk.Style()
 
@@ -33,8 +36,8 @@ frame.pack()
 
 btnColor="#196E78"
 
-manageFrame=tkinter.LabelFrame(frame,text="ADMINISTRATOR ACTIONS",borderwidth=5)
-manageFrame.grid(row=0,column=0,sticky="W",padx=[10,200],pady=20,ipadx=[5])
+manageFrame=tkinter.LabelFrame(frame,text="ADMINISTRATOR ACTIONS",borderwidth=2, font=("Tahoma", 15),fg="black")
+manageFrame.grid(row=0,column=0,sticky="W",padx=[10,0],pady=20,ipadx=[10])
 
 
 def manageStudent():
@@ -42,62 +45,62 @@ def manageStudent():
    quizBtn.config(bg = btnColor)
    questionBtn.config(bg = btnColor)
    answerBtn.config(bg = btnColor)
-   ManageStudent(window,frame,btnColor,style).constructFrame()
+   ManageStudent(window,frame,btnColor,style)
 
 def manageQuiz():
     studentBtn.configure(bg = btnColor)
     quizBtn.config(bg = "grey")
     questionBtn.config(bg = btnColor)
     answerBtn.config(bg = btnColor)
-    ManageQuizz(window,frame,btnColor,style).constructFrame()
+    ManageQuizz(window,frame,btnColor,style)
 
 def manageQuestion():
     studentBtn.configure(bg = btnColor)
     quizBtn.config(bg = btnColor)
     questionBtn.config(bg = "grey")
     answerBtn.config(bg = btnColor)
-    ManageQuestion(window,frame,btnColor,style).constructFrame()
+    ManageQuestion(window,frame,btnColor,style)
 
 def manageAnswer():
     studentBtn.configure(bg = btnColor)
     quizBtn.config(bg = btnColor)
     questionBtn.config(bg = btnColor)
     answerBtn.config(bg = "grey")
-    ManageAnswer(window,frame,btnColor,style).constructFrame()
+    ManageAnswer(window,frame,btnColor,style)
 
 def disconnect():
     controlPrivileges()
 def header():
     global studentBtn, quizBtn, questionBtn, answerBtn
-    studentBtn=Button(manageFrame,text="MANAGE STUDENT",width=20,borderwidth=3,bg=btnColor,fg='white',command=manageStudent, cursor="hand2")
-    quizBtn=Button(manageFrame,text="MANAGE QUIZZ",width=20,borderwidth=3,bg=btnColor,fg='white',command=manageQuiz, cursor="hand2")
-    questionBtn=Button(manageFrame,text="MANAGE QUESTION",width=20,borderwidth=3,bg=btnColor,fg='white',command=manageQuestion, cursor="hand2")
-    answerBtn=Button(manageFrame,text="MANAGE ANSWER",width=20,borderwidth=3,bg=btnColor,fg='white',command=manageAnswer, cursor="hand2")
-    logoutBtn=Button(manageFrame,text="DISCONNECT",width=20,borderwidth=3,bg=btnColor,fg='white',command=disconnect, cursor="hand2")
+    studentBtn=Button(manageFrame,text="MANAGE STUDENT",width=25,borderwidth=3,bg=btnColor,fg='white', height=2,command=manageStudent, cursor="hand2")
+    quizBtn=Button(manageFrame,text="MANAGE QUIZZ",width=25,borderwidth=3,bg=btnColor,fg='white',height=2,command=manageQuiz, cursor="hand2")
+    questionBtn=Button(manageFrame,text="MANAGE QUESTION",width=25,borderwidth=3,bg=btnColor,fg='white',height=2,command=manageQuestion, cursor="hand2")
+    answerBtn=Button(manageFrame,text="MANAGE ANSWER",width=25,borderwidth=3,bg=btnColor,fg='white',height=2,command=manageAnswer, cursor="hand2")
+    logoutBtn=Button(manageFrame,text="DISCONNECT",width=25,borderwidth=3,bg=btnColor,fg='white',height=2,command=disconnect, cursor="hand2")
 
-    studentBtn.grid(row=0,column=0,padx=5,pady=5)
-    quizBtn.grid(row=0,column=1,padx=5,pady=5)
-    questionBtn.grid(row=0,column=2,padx=5,pady=5)
-    answerBtn.grid(row=0,column=3,padx=5,pady=5)
-    logoutBtn.grid(row=0,column=4,padx=5,pady=5)
+    studentBtn.grid(row=0,column=1,padx=[350,0],pady=5)
+    quizBtn.grid(row=0,column=2,padx=5,pady=5)
+    questionBtn.grid(row=0,column=3,padx=5,pady=5)
+    answerBtn.grid(row=0,column=4,padx=5,pady=5)
+    logoutBtn.grid(row=0,column=5,padx=5,pady=5)
 header()
 
-def controlPrivileges(studentNumber=None,code=None, quizz=None, sname=None, quizId=None):
+def controlPrivileges(studentNumber=None,code=1024, quizz="quiz1", sname="pierre", quizId=2):
     if studentNumber is None and code is None:
         frame1.pack()
         MainScreen(window,frame1).constructFrame()
-        frame2.pack_forget()
-        frame.pack_forget()
+        frame2.destroy()
+        frame.destroy()
     elif studentNumber is not None:
         frame2.pack()       
         QuizScreen(window,frame2,quizz,sname,quizId)
-        frame1.pack_forget()
-        frame.pack_forget()
+        frame1.destroy()
+        frame.destroy()
     elif code is not None:
         frame.pack()
-        ManageStudent(window,frame,btnColor,style).constructFrame()
-        frame1.pack_forget()
-        frame2.pack_forget()
+        ManageStudent(window,frame,btnColor,style)
+        frame1.destroy()
+        frame2.destroy()
         
 class MainScreen:
     def __init__(self,window,frame):
@@ -178,7 +181,7 @@ class MainScreen:
 
         self.numberEntry=Entry(frame5,width=50,textvariable="")
         self.numberEntry.grid(row=0,column=2,padx=5,pady=5)
-
+        
 
 
         self.quizLabel=Label(frame5,text="Select your quiz",anchor="e",width=15, fg="black")
@@ -248,10 +251,10 @@ class QuizScreen:
         self.disconnect = Button(self.titleFrame,text="DISCONNECT",width=20,borderwidth=3,bg=btnColor,fg='white',command=self.disconnect,cursor="hand2")
        
         self.question_label = Label(self.frame, height=4, width=50, fg="black", font=('Verdana', 20), text="hgvcg", wraplength=500, bg='#ddd')
-        self.option1 = Radiobutton(self.frame, bg="#fff", variable=self.v1,height=1, width=5, cursor="hand2", font=('Verdana', 20), command=lambda:self.checkAnswer(self.option1))
-        self.option2 = Radiobutton(self.frame, bg="#fff", variable=self.v2, width=5,cursor="hand2", font=('Verdana', 20), command=lambda:self.checkAnswer(self.option2))
-        self.option3 = Radiobutton(self.frame, bg="#fff", variable=self.v3, width=5,cursor="hand2", font=('Verdana', 20), command=lambda:self.checkAnswer(self.option3))
-        self.option4 = Radiobutton(self.frame, bg="#fff", variable=self.v4, width=5,cursor="hand2", font=('Verdana', 20), command=lambda:self.checkAnswer(self.option4))
+        self.option1 = Radiobutton(self.frame, bg="#fff", variable=self.v1, width=75, cursor="hand2", font=('Verdana', 13), command=lambda:self.checkAnswer(self.option1))
+        self.option2 = Radiobutton(self.frame, bg="#fff", variable=self.v2, width=75,cursor="hand2", font=('Verdana', 13), command=lambda:self.checkAnswer(self.option2))
+        self.option3 = Radiobutton(self.frame, bg="#fff", variable=self.v3, width=75,cursor="hand2", font=('Verdana', 13), command=lambda:self.checkAnswer(self.option3))
+        self.option4 = Radiobutton(self.frame, bg="#fff", variable=self.v4, width=75,cursor="hand2", font=('Verdana', 13), command=lambda:self.checkAnswer(self.option4))
         
         self.btn_next = Button(self.frame, text="Next Question >",cursor="hand2",bg="Orange", width=15, font=("Verdana", 15), command=self.displayNextQuestion)
         self.frame.pack(fill="both", expand="true")
@@ -265,7 +268,7 @@ class QuizScreen:
         self.option3.grid(sticky="W", row=4, column=0, pady=10)
         self.option4.grid(sticky="W", row=5, column=0, pady=10)
 
-        self.btn_next.grid(row=6, column=0,)
+        self.btn_next.grid(row=6, column=0,pady=[10,0])
         self.displayNextQuestion()
         print(self.correct)
 
