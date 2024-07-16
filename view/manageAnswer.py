@@ -47,6 +47,7 @@ class ManageAnswer:
         self.entriesFrameAnswer.grid(row=1,column=0,sticky="w",padx=[10,290],pady=[0,20],ipadx=[2])
 
         self.countAnswer = 0
+        self.countAnswerArray = []
         self.countAnswerLabel=Label(self.entriesFrameAnswer,text=self.countAnswer,background="grey64",anchor="e",width=15,font=("Tahoma",15))
         
         self.quizComboLabel=Label(self.entriesFrameAnswer,text="Select Quiz",anchor="e",width=15)
@@ -130,16 +131,6 @@ class ManageAnswer:
         self.quizCombo.grid(row=0,column=1,columnspan=5,padx=5,pady=2)
         self.countAnswerLabel.grid(row=1,column=6,padx=5,pady=2)
 
-        if(len(self.categoryQuizArray) != 0 and self.quizCombo.get() == ""):
-            self.quizCombo.current(0)
-            self.loadQuestion("")
-        if(len(self.categoryArray) != 0 and self.questionCombo.get() == ""):
-                self.questionCombo.current(0)
-                self.countAnswer = len(Answer().getAnswerByQuestionId(self.getQuestionId()))
-                if(self.countAnswer < 2):
-                    self.countAnswer = 0
-                self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
-                
         
         self.questionCombo.bind("<<ComboboxSelected>>", self.displayCountAnswer)
         self.quizCombo.bind("<<ComboboxSelected>>", self.loadQuestion)
@@ -176,22 +167,55 @@ class ManageAnswer:
         self.my_tree.tag_configure('orow',background="#EEEEEE")
         self.refreshTable()
 
+        if(len(self.categoryQuizArray) != 0 and self.quizCombo.get() == ""):
+            self.quizCombo.current(0)
+            self.loadQuestion("")
+        if(len(self.categoryArray) != 0 and self.questionCombo.get() == ""):
+                self.questionCombo.current(0)
+                self.countAnswer = len(Answer().getAnswerByQuestionId(self.getQuestionId()))
+                for i in range(0,self.countAnswer):
+                    if (Answer().getAnswerByQuestionId(self.getQuestionId())[i]['answer_text'] != ""):
+                        self.countAnswerArray.append(Answer().getAnswerByQuestionId(self.getQuestionId()))
+                if(self.countAnswer <= 1):
+                    self.countAnswer = 0
+                    self.saveBtn['state']='active'
+                else:
+                    self.saveBtn['state']='disabled'
+                    for i in range(0,self.countAnswer):
+                        self.placeholderArray[i].set(Answer().getAnswerByQuestionId(self.getQuestionId())[i]["answer_text"])
+                self.countAnswerLabel['text'] = str(len(self.countAnswerArray))+" answers"
+
+
     def displayCountAnswer(self,event):
             self.countAnswer = len(Answer().getAnswerByQuestionId(self.getQuestionId()))
-            if(self.countAnswer <= 1):
+            if(len(self.countAnswerArray) <= 1):
                     self.countAnswer = 0
-            self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
+                    self.saveBtn['state']='active'
+            else:
+                self.saveBtn['state']='disabled'
+            self.countAnswerLabel['text'] = str(len(self.countAnswerArray))+" answers"
+            print("COUNT:", self.countAnswer)
+            for num in range(0,6):
+                self.placeholderArray[num].set('')
+            if(self.countAnswer > 1):
+                for i in range(0,self.countAnswer):
+                    self.placeholderArray[i].set(Answer().getAnswerByQuestionId(self.getQuestionId())[i]["answer_text"])
 
     def loadQuestion(self,event):
+            self.countAnswer = 0
+            self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
+            for num in range(0,6):
+                self.placeholderArray[num].set('')
             self.question = Question().getQuestionByQuizIdAndType(self.getQuizId(),"Q.C.M")
             self.categoryArray = []
             self.categoryArray1 = []
-            self.placeholderArray[1].set('')
+            self.placeholderArray[6].set('')
             if(isinstance(self.question, list)):
                 for question in self.question:
                     self.categoryArray.append(question['question_text'])
                     self.categoryArray1.append({'question_id':question['id'], 'question_text':question['question_text']})
             self.questionCombo["values"] = self.categoryArray
+            
          
 
     def setph(self,word,num):
@@ -228,17 +252,18 @@ class ManageAnswer:
                     answer_text=str(self.answerTextArrays[i].get())
                     is_correct = self.placeholderCorrectArray[i].get()
                     valid=True
-                    if(answer_text != ""):
-                        if  not(question_id) or not(answer_text):
-                            messagebox.showwarning("","Please fill up all entries")
-                            return
-                        Answer(answer_text,is_correct,question_id).createAnswer()
-                        self.countAnswer = len(Answer().getAnswerByQuestionId(self.getQuestionId()))
-                        self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
+                    if  not(question_id):
+                        messagebox.showwarning("","Please fill up all entries")
+                        return
+                    Answer(answer_text,is_correct,question_id).createAnswer()
+                    self.countAnswer = len(Answer().getAnswerByQuestionId(self.getQuestionId()))
+                    self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
                 for num in range(0,7):
                         if num == 6:
                             continue
                         self.setph('',(num))
+                for num in range(0,6):
+                        self.setph1(0,(num))
                 self.refreshTable()
             else:
                 messagebox.showwarning("", "This question have the maximum anwser")
@@ -248,25 +273,29 @@ class ManageAnswer:
             return
 
     def update(self):
-        selectedItemId = ''
         try:
-            selectedItem = self.my_tree.selection()[0]
-            selectedItemId = str(self.my_tree.item(selectedItem)['values'][0])
+            countAnswer1 = Answer().getAnswerByQuestionId(self.getQuestionId())
+            for i in range(0,len(countAnswer1)):
+                question_id=int(self.getQuestionId())
+                answer_text=str(self.answerTextArrays[i].get())
+                is_correct = self.placeholderCorrectArray[i].get()
+                answerId = int(Answer().getAnswerByQuestionId(self.getQuestionId())[i]['id'])
+                valid=True
+                Answer(answer_text,is_correct,question_id).updateAnswer(answerId)
+                self.countAnswer = len(countAnswer1)
+                self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
+            for num in range(0,7):
+                if num == 6:
+                    continue
+                self.setph('',(num))
+            for num in range(0,6):
+                        self.setph1(0,(num))
+            for i in range(0,self.countAnswer):
+                self.placeholderArray[i].set(Answer().getAnswerByQuestionId(self.getQuestionId())[i]["answer_text"])
+            self.refreshTable()
         except:
-            messagebox.showwarning("", "Please select answer on the table")
+            messagebox.showwarning("", "An error occured !")
             return
-        print(selectedItemId)
-        question_id = str(self.my_tree.item(selectedItem)['values'][3])
-        answer_text=str(self.answerText1Entry.get())
-        is_correct = self.placeholderCorrectArray[0].get()
-        valid=True
-        if  not(answer_text):
-            messagebox.showwarning("","Please fill up all entries")
-            return
-        Answer(answer_text,is_correct,question_id).updateAnswer(selectedItemId)
-        self.setph("",0)
-        self.saveBtn['state']='active'
-        self.refreshTable()
 
     def select(self,event):
         try:
@@ -297,14 +326,14 @@ class ManageAnswer:
                     try:
                         Answer().deleteAnswer(itemId)
                         messagebox.showinfo("","Data has been successfully deleted")
-                        for num in range(0,5):
+                        for num in range(0,7):
                             self.setph('',(num))
                         self.saveBtn['state']='active'
                         self.refreshTable()
                     except:
                         messagebox.showinfo("","Sorry, an error occured")
                         return
-                    self.countAnswer = len(Answer().getAnswerByQuestionId(self.getQuestionId()))
+                    self.countAnswer = 0
                     self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
                     self.refreshTable()
         except:

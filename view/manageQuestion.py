@@ -1,5 +1,6 @@
 from tkinter import NO, W, Button, Entry, Label, messagebox, ttk
 import tkinter
+from api.answer import Answer
 from api.question import Question
 from api.quizz import Quizz
 
@@ -142,8 +143,7 @@ class ManageQuestion:
             messagebox.showwarning("","Please fill up all entries")
             return
         Question(question_text,question_type,quizz_id).updateQuestion(selectedItemId)
-        for num in range(0,5):
-                self.setph('',(num))
+        self.setph('',0)
         self.saveBtn['state']='active'
         self.refreshTable()
 
@@ -151,12 +151,19 @@ class ManageQuestion:
         try:
             self.saveBtn['state']='disabled'
             selectedItem = self.my_tree.selection()[0]
+            question_id = str(self.my_tree.item(selectedItem)['values'][0])
             question_text = str(self.my_tree.item(selectedItem)['values'][1])
             quizz_id = str(self.my_tree.item(selectedItem)['values'][3])
             question_type = str(self.my_tree.item(selectedItem)['values'][2])
+            quizz_text = Quizz().getQuizzById(quizz_id)["title"]
+            countAnswer = len(Answer().getAnswerByQuestionId(question_id))
+            if(countAnswer >= 2):
+                self.deleteBtn['state']='disabled'
             self.setph(question_text,0)
-            self.setph(quizz_id,1)
+            self.setph(quizz_text,1)
             self.setph(question_type,2)
+            self.countQuestion = len(Question().getQuestionByQuizId(quizz_id))
+            self.countQuestionLabel['text'] = str(self.countQuestion)+" questions"
         except:
             messagebox.showwarning("", "Please select a data row--------")
             return
@@ -173,23 +180,19 @@ class ManageQuestion:
                     try:
                         Question().deleteQuestion(itemId)
                         messagebox.showinfo("","Data has been successfully deleted")
-                        for num in range(0,5):
-                            self.setph('',(num))
+                        self.typeQuestionCombo.current(0)
+                        self.setph('',0)
                         self.refreshTable()
                     except:
                         messagebox.showinfo("","Sorry, an error occured")
                         return
+                    self.countQuestion = len(Question().getQuestionByQuizId(self.getQuizId()))
+                    self.countQuestionLabel['text'] = str(self.countQuestion)+" questions"
                     self.saveBtn['state']='active'
+                    self.deleteBtn['state']='active'
                     self.refreshTable()
         except:
             messagebox.showwarning("", "Please select a data row")
-
-
-    
-    def setph(self,word,num):
-        for ph in range(0,5):
-            if ph == num:
-                self.placeholderArray[ph].set(word)
                 
     def read(self,offset):
         results =  Question().getQuestionsByPagination(offset)
@@ -229,9 +232,9 @@ class ManageQuestion:
             for ph in range(0,5):
                 if ph == num:
                     self.placeholderArray[ph].set(word)
-
     def reset(self):
         self.saveBtn['state']='active'
+        self.deleteBtn['state']='active'
         for num in range(0,5):
             self.setph('',(num))
 
