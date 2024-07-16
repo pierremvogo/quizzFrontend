@@ -85,7 +85,7 @@ def header():
     logoutBtn.grid(row=0,column=5,padx=5,pady=5)
 header()
 
-def controlPrivileges(studentNumber=None,code=1024, quizz="quiz1", sname="pierre", quizId=2):
+def controlPrivileges(studentNumber=1111,code=None, quizz="quiz1", sname="pierre", quizId=1):
     if studentNumber is None and code is None:
         frame1.pack()
         MainScreen(window,frame1).constructFrame()
@@ -234,6 +234,7 @@ class QuizScreen:
         self.dict_questions = {}
 
         self.questions1 = Question().getQuestionByQuizId(self.quiz_id)
+        print("ANSWER -----",self.questions1)
         for question1 in self.questions1:
             answer = Answer().getAnswerByQuestionId(question1["id"])
             self.dict_questions[f"{question1["question_text"]}"] = answer

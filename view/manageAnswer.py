@@ -35,8 +35,6 @@ class ManageAnswer:
             self.categoryQuizArray.append(quizz['title'])
             self.categoryQuizArray1.append({'quizz_id':quizz['id'], 'quizz_title':quizz['title']})
 
-        
-
         self.listFrameAnswer=tkinter.LabelFrame(self.frameanswer,text="LIST OF ANSWER",borderwidth=5,font=("Tahoma", 15),fg="black")
         self.listFrameAnswer.grid(row=5,column=0,sticky="w",padx=[10,10],pady=[0,200],ipadx=[50])
 
@@ -47,8 +45,7 @@ class ManageAnswer:
         self.entriesFrameAnswer.grid(row=1,column=0,sticky="w",padx=[10,290],pady=[0,20],ipadx=[2])
 
         self.countAnswer = 0
-        self.countAnswerArray = []
-        self.countAnswerLabel=Label(self.entriesFrameAnswer,text=self.countAnswer,background="grey64",anchor="e",width=15,font=("Tahoma",15))
+        ##self.countAnswerLabel=Label(self.entriesFrameAnswer,text=self.countAnswer,background="grey64",anchor="e",width=15,font=("Tahoma",15))
         
         self.quizComboLabel=Label(self.entriesFrameAnswer,text="Select Quiz",anchor="e",width=15)
         self.questionLabel=Label(self.entriesFrameAnswer,text="Select Question",anchor="e",width=15)
@@ -129,7 +126,7 @@ class ManageAnswer:
 
         self.questionCombo.grid(row=1,column=1,columnspan=5,padx=5,pady=2)
         self.quizCombo.grid(row=0,column=1,columnspan=5,padx=5,pady=2)
-        self.countAnswerLabel.grid(row=1,column=6,padx=5,pady=2)
+        ##self.countAnswerLabel.grid(row=1,column=6,padx=5,pady=2)
 
         
         self.questionCombo.bind("<<ComboboxSelected>>", self.displayCountAnswer)
@@ -172,10 +169,7 @@ class ManageAnswer:
             self.loadQuestion("")
         if(len(self.categoryArray) != 0 and self.questionCombo.get() == ""):
                 self.questionCombo.current(0)
-                self.countAnswer = len(Answer().getAnswerByQuestionId(self.getQuestionId()))
-                for i in range(0,self.countAnswer):
-                    if (Answer().getAnswerByQuestionId(self.getQuestionId())[i]['answer_text'] != ""):
-                        self.countAnswerArray.append(Answer().getAnswerByQuestionId(self.getQuestionId()))
+                self.countAnswer =  len(Answer().getAnswerByQuestionId(self.getQuestionId()))
                 if(self.countAnswer <= 1):
                     self.countAnswer = 0
                     self.saveBtn['state']='active'
@@ -183,17 +177,17 @@ class ManageAnswer:
                     self.saveBtn['state']='disabled'
                     for i in range(0,self.countAnswer):
                         self.placeholderArray[i].set(Answer().getAnswerByQuestionId(self.getQuestionId())[i]["answer_text"])
-                self.countAnswerLabel['text'] = str(len(self.countAnswerArray))+" answers"
+                #self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
 
 
     def displayCountAnswer(self,event):
             self.countAnswer = len(Answer().getAnswerByQuestionId(self.getQuestionId()))
-            if(len(self.countAnswerArray) <= 1):
+            if(self.countAnswer <= 1):
                     self.countAnswer = 0
                     self.saveBtn['state']='active'
             else:
                 self.saveBtn['state']='disabled'
-            self.countAnswerLabel['text'] = str(len(self.countAnswerArray))+" answers"
+            #self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
             print("COUNT:", self.countAnswer)
             for num in range(0,6):
                 self.placeholderArray[num].set('')
@@ -203,7 +197,7 @@ class ManageAnswer:
 
     def loadQuestion(self,event):
             self.countAnswer = 0
-            self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
+            #self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
             for num in range(0,6):
                 self.placeholderArray[num].set('')
             self.question = Question().getQuestionByQuizIdAndType(self.getQuizId(),"Q.C.M")
@@ -257,10 +251,8 @@ class ManageAnswer:
                         return
                     Answer(answer_text,is_correct,question_id).createAnswer()
                     self.countAnswer = len(Answer().getAnswerByQuestionId(self.getQuestionId()))
-                    self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
+                    #self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
                 for num in range(0,7):
-                        if num == 6:
-                            continue
                         self.setph('',(num))
                 for num in range(0,6):
                         self.setph1(0,(num))
@@ -283,7 +275,7 @@ class ManageAnswer:
                 valid=True
                 Answer(answer_text,is_correct,question_id).updateAnswer(answerId)
                 self.countAnswer = len(countAnswer1)
-                self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
+                #self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
             for num in range(0,7):
                 if num == 6:
                     continue
@@ -309,7 +301,7 @@ class ManageAnswer:
             self.setph(question_text,6)
             self.setph1(is_correct,0)
             self.countAnswer = len(Answer().getAnswerByQuestionId(question_id))
-            self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
+            #self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
         except:
             messagebox.showwarning("", "Please select a data row--------")
             return
@@ -334,7 +326,7 @@ class ManageAnswer:
                         messagebox.showinfo("","Sorry, an error occured")
                         return
                     self.countAnswer = 0
-                    self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
+                    #self.countAnswerLabel['text'] = str(self.countAnswer)+" answers"
                     self.refreshTable()
         except:
             messagebox.showwarning("", "Please select a data row")
