@@ -167,8 +167,8 @@ class ManageStudent:
         for data in self.my_tree.get_children():
             self.my_tree.delete(data)
         for array in self.read(offset):
-            self.my_tree.insert(parent='',index='end',iid=array['id'],text="",values=(
-                array['id'], 
+            self.my_tree.insert(parent='',index='end',iid=array['student_id'],text="",values=(
+                array['student_id'], 
                 array['student_number'],
                 array['name'],
                 array['surname'],

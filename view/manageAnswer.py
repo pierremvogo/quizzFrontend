@@ -5,6 +5,7 @@ from api.question import Question
 from api.quizz import Quizz
 from api.student import Student
 from api.answer import Answer
+from api.student_answer import StudentAnswer
 
 
 class ManageAnswer:
@@ -148,19 +149,17 @@ class ManageAnswer:
         self.style.configure(self.windowanswer)
         self.style.configure("Treeview.Heading", font=("Verdana", 12))
         self.style.configure("Treeview.Column", font=(None, 20))
-        self.my_tree['columns']=("Answer Id","Answer Text","Is Correct","Question Id", "Student Id")
+        self.my_tree['columns']=("Answer Id","Answer Text","Is Correct","Question Id")
         self.my_tree.column("#0",width=0,stretch=NO)
         self.my_tree.column("Answer Id",anchor=W,width=120)
         self.my_tree.column("Answer Text",anchor=W,width=580)
         self.my_tree.column("Is Correct",anchor=W,width=200) 
-        self.my_tree.column("Question Id",anchor=W,width=200) 
-        self.my_tree.column("Student Id",anchor=W,width=200) 
+        self.my_tree.column("Question Id",anchor=W,width=200)
 
         self.my_tree.heading("Answer Id",text="Answer Id",anchor=W)
         self.my_tree.heading("Answer Text",text="Answer Text",anchor=W)
         self.my_tree.heading("Is Correct",text="Is Correct",anchor=W)
         self.my_tree.heading("Question Id",text="Question Id",anchor=W)
-        self.my_tree.heading("Student Id",text="Student Id",anchor=W)
         self.my_tree.tag_configure('orow',background="#EEEEEE")
         self.refreshTable()
 
@@ -316,6 +315,7 @@ class ManageAnswer:
                     selectedItem = self.my_tree.selection()[0]
                     itemId = str(self.my_tree.item(selectedItem)['values'][0])
                     try:
+                        StudentAnswer().deleteStudentAnswer(itemId, s)
                         Answer().deleteAnswer(itemId)
                         messagebox.showinfo("","Data has been successfully deleted")
                         for num in range(0,7):
@@ -346,8 +346,7 @@ class ManageAnswer:
                 array['id'], 
                 array['answer_text'],
                 array['is_correct'],
-                array['question_id'],
-                array['student_id']),tag="orow")
+                array['question_id']),tag="orow")
         self.my_tree.tag_configure('orow',background="#EEEEEE")
         self.my_tree.grid(row=0, column=4, pady=[10,5])
         back = offset - 10

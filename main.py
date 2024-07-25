@@ -13,6 +13,8 @@ from api.answer import Answer
 from api.question import Question
 from api.quizz import Quizz
 from api.student import Student
+from api.student_answer import StudentAnswer
+from api.tutor import Tutor
 from view.manageAnswer import ManageAnswer
 from view.manageQuestion import ManageQuestion
 from view.manageQuizz import ManageQuizz
@@ -30,14 +32,8 @@ style=ttk.Style()
 frame=tkinter.Frame(window,bg="#02577A")
 frame1=tkinter.Frame(window,bg="#02577A")
 frame2=tkinter.Frame(window,bg="#02577A")
-frame2.pack()
-frame1.pack()
-frame.pack()
-
+frame3=tkinter.Frame(window,bg="#02577A")
 btnColor="#196E78"
-
-manageFrame=tkinter.LabelFrame(frame,text="ADMINISTRATOR ACTIONS",borderwidth=2, font=("Tahoma", 15),fg="black")
-manageFrame.grid(row=0,column=0,sticky="W",padx=[10,0],pady=20,ipadx=[10])
 
 
 def manageStudent():
@@ -68,15 +64,23 @@ def manageAnswer():
     answerBtn.config(bg = "grey")
     ManageAnswer(window,frame,btnColor,style)
 
-def disconnect():
+def disconnectAdmin():
+    frame.pack_forget()
+    frame1.pack()
     controlPrivileges()
+
+
 def header():
     global studentBtn, quizBtn, questionBtn, answerBtn
+
+    manageFrame=tkinter.LabelFrame(frame,text="ADMINISTRATOR ACTIONS",borderwidth=2, font=("Tahoma", 15),fg="black")
+    manageFrame.grid(row=0,column=0,sticky="W",padx=[10,0],pady=20,ipadx=[10])
+
     studentBtn=Button(manageFrame,text="MANAGE STUDENT",width=25,borderwidth=3,bg=btnColor,fg='white', height=2,command=manageStudent, cursor="hand2")
     quizBtn=Button(manageFrame,text="MANAGE QUIZZ",width=25,borderwidth=3,bg=btnColor,fg='white',height=2,command=manageQuiz, cursor="hand2")
     questionBtn=Button(manageFrame,text="MANAGE QUESTION",width=25,borderwidth=3,bg=btnColor,fg='white',height=2,command=manageQuestion, cursor="hand2")
     answerBtn=Button(manageFrame,text="MANAGE ANSWER",width=25,borderwidth=3,bg=btnColor,fg='white',height=2,command=manageAnswer, cursor="hand2")
-    logoutBtn=Button(manageFrame,text="DISCONNECT",width=25,borderwidth=3,bg=btnColor,fg='white',height=2,command=disconnect, cursor="hand2")
+    logoutBtn=Button(manageFrame,text="DISCONNECT",width=25,borderwidth=3,bg=btnColor,fg='white',height=2,command=disconnectAdmin, cursor="hand2")
 
     studentBtn.grid(row=0,column=1,padx=[350,0],pady=5)
     quizBtn.grid(row=0,column=2,padx=5,pady=5)
@@ -85,22 +89,33 @@ def header():
     logoutBtn.grid(row=0,column=5,padx=5,pady=5)
 header()
 
-def controlPrivileges(studentNumber=1111,code=None, quizz="quiz1", sname="pierre", quizId=1):
-    if studentNumber is None and code is None:
+
+
+
+def controlPrivileges(studentNumber=None,code=None,tutor_code=None, quizz=None, sname=None,sid=None, quizId=None):
+    print("-----STN",studentNumber,"----STC",code)
+    if studentNumber is None and code is None and tutor_code is None:
         frame1.pack()
         MainScreen(window,frame1).constructFrame()
-        frame2.destroy()
-        frame.destroy()
     elif studentNumber is not None:
         frame2.pack()       
-        QuizScreen(window,frame2,quizz,sname,quizId)
-        frame1.destroy()
-        frame.destroy()
+        QuizScreen(window,frame2,quizz,sname,sid,quizId)
     elif code is not None:
         frame.pack()
         ManageStudent(window,frame,btnColor,style)
-        frame1.destroy()
-        frame2.destroy()
+    elif tutor_code is not None:
+        frame3.pack()
+        print("FRAME1333")
+        TutorScreen(window,frame3)
+        print("FRAME3")
+
+
+
+
+
+
+
+
         
 class MainScreen:
     def __init__(self,window,frame):
@@ -108,50 +123,93 @@ class MainScreen:
         self.frame= frame
         self.image = Image.open("C:/Users/pc/Documents/projetPython/frontendQuizz/view/img1.png")
         self.bg = ImageTk.PhotoImage(self.image)
-        self.canvas = Canvas(self.frame, width=800, height=700, bg="#d0d2d6")
+        self.canvas = Canvas(self.frame, width=1350, height=760, bg="#d0d2d6")
         self.canvas.pack(fill="both", expand=True)
         self.canvas.create_image(15, 100, anchor=NW, image=self.bg)
         self.canvas.create_text(380, 70, text="Welcome To Your Quizz App!", font=("Purisa",30, 'bold italic'), fill="black")
         self.student_number = None
         self.code = None
+        self.tutor_code = None
 
     def constructFrame(self):
         label=Label(self.frame,text="",width=100,height=2,borderwidth=3)
         b1=Button(self.frame,text="I'M STUDENT",width=40,height=2,borderwidth=3,bg="#538CC6",font=("Purisa",10,"bold"),fg='white', cursor="hand2", command=self.displayQuiz)
         b2=Button(self.frame,text="I'M ADMINISTRATOR",width=40,height=2,borderwidth=3,bg="#538CC6",font=("Purisa",10,"bold"),fg='white', cursor="hand2", command=self.displayAdmin)
+        b3=Button(self.frame,text="I'M TUTOR",width=40,height=2,borderwidth=3,bg="#538CC6",font=("Purisa",10,"bold"),fg='white', cursor="hand2", command=self.displayTutor)
         
         
         self.canvas.create_window(70,220, anchor="nw", window=b1)
         self.canvas.create_window(70,290, anchor="nw", window=b2)
+        self.canvas.create_window(70,360, anchor="nw", window=b3)
 
     def openAdminModal(self):
-        pop = Toplevel(frame1)
-        pop.title("Please Enter your Admin Code")
-        pop.geometry("500x150")
-        pop.config(bg="white")
-        pop.grab_set()
-        frame4 = Frame(pop)
-        frame4.pack(pady=10)
-        self.codeLabel=Label(frame4,text="Admin Code",anchor="e",width=15, fg="black")
+        self.pop = Toplevel()
+        self.pop.title("Please Enter your Admin Code")
+        self.pop.geometry("500x150")
+        self.pop.config(bg="white")
+        self.pop.grab_set()
+        self.frame4 = Frame(self.pop)
+        self.frame4.pack(pady=10)
+        self.codeLabel=Label(self.frame4,text="Admin Code",anchor="e",width=15, fg="black")
         self.codeLabel.grid(row=0,column=0,padx=10)
 
-        self.b1=Button(frame4,text="Get Access >",cursor="hand2",width=20,height=1,bg=btnColor,fg="white",command=lambda:self.signInAdmin(str(self.codeEntry.get()),pop))
+        self.b1=Button(self.frame4,text="Get Access >",cursor="hand2",width=20,height=1,bg=btnColor,fg="white",command=lambda:self.signInAdmin(str(self.codeEntry.get()),self.pop))
         self.b1.grid(row=1,column=2,columnspan=10,padx=5,pady=5)
 
-        self.codeEntry=Entry(frame4,width=50,textvariable="")
+        self.codeEntry=Entry(self.frame4,width=50,textvariable="")
         self.codeEntry.grid(row=0,column=2,padx=5,pady=5)
+
+
+    def openTutorModal(self):
+        self.pop = Toplevel()
+        self.pop.title("Please Enter your Admin Code")
+        self.pop.geometry("500x150")
+        self.pop.config(bg="white")
+        self.pop.grab_set()
+        self.frame4 = Frame(self.pop)
+        self.frame4.pack(pady=10)
+        self.codeLabel=Label(self.frame4,text="Admin Code",anchor="e",width=15, fg="black")
+        self.codeLabel.grid(row=0,column=0,padx=10)
+
+        self.b1=Button(self.frame4,text="Get Access >",cursor="hand2",width=20,height=1,bg=btnColor,fg="white",command=lambda:self.signInTutor(str(self.codeEntry.get()),self.pop))
+        self.b1.grid(row=1,column=2,columnspan=10,padx=5,pady=5)
+
+        self.codeEntry=Entry(self.frame4,width=50,textvariable="")
+        self.codeEntry.grid(row=0,column=2,padx=5,pady=5)
+
+
+    def signInTutor(self,code,pop):
+        try:
+            pop.destroy()
+            results =  Tutor().getTutorByCode(code)
+            print(results)
+            self.tutor_code = int(results["code"])
+            frame1.pack_forget()
+            print("SING 1")
+            controlPrivileges(None,None, self.tutor_code)
+            print("SING 2")
+            self.code = None
+            self.student_number = None
+            self.tutor_code = None
+            
+        except:
+            messagebox.showwarning("", "An Error Occured! please try again--")
 
     def signInAdmin(self,code,pop):
         try:
+            pop.destroy()
             results =  Admin().getAdminByCode(code)
             print(results)
-            self.code = results["code"]
-            pop.destroy()
+            self.code = int(results["code"])
+            frame1.pack_forget()
             controlPrivileges(None,self.code)
+            print("break2")
             self.code = None
             self.student_number = None
+            self.tutor_code = None
+            
         except:
-            messagebox.showwarning("", "An Error Occured! please try again")
+            messagebox.showwarning("", "An Error Occured! please try again--")
             
     def openStudentModal(self):
         pop = Toplevel(frame1)
@@ -168,11 +226,16 @@ class MainScreen:
         self.categoryArray=[]
         self.categoryArray1=[]
         self.quizz = Quizz().getQuizz()
+        self.quizzArray = []
         print("ALL QUIIZ DATA: ",self.quizz)
         for quizz in self.quizz:
-            self.categoryArray.append(quizz['title'])
-            self.categoryArray1.append({'quizz_id':quizz['id'], 'quizz_title':quizz['title']})
-            
+            print("ddd--------------------------------->>>",Question().getQuestionByQuizId(quizz['id']))
+            if(isinstance(Question().getQuestionByQuizId(quizz['id']), list)):
+                self.quizzArray.append(quizz)
+        print("Text Question -------------->>>>>-->", self.quizzArray)
+        for i in range(0, len(self.quizzArray)):
+                self.categoryArray.append(self.quizzArray[i]['title'])
+                self.categoryArray1.append({'quizz_id':self.quizzArray[i]['id'], 'quizz_title':self.quizzArray[i]['title']})
         self.numberLabel=Label(frame5,text="Student Number",anchor="e",width=15, fg="black")
         self.numberLabel.grid(row=0,column=0,padx=10)
 
@@ -199,144 +262,362 @@ class MainScreen:
         try:
             results =  Student().getStudentByNumber(student_number)
             self.student_number = results["student_number"]
-            Student(self.student_number,None,None,self.getQuizId()).updateQuizStudent(results["id"])
-            controlPrivileges(self.student_number,None, self.quizCombo.get(), results["name"]+" "+results["surname"], self.getQuizId())
+            Student(self.student_number,None,None,self.getQuizId()).updateQuizStudent(results["student_id"])
+            print(self.student_number, self.quizCombo.get(),results["name"]+" "+results["surname"],results["student_id"],self.getQuizId())
+            frame1.pack_forget()
+            controlPrivileges(
+                self.student_number,
+                None, 
+                self.quizCombo.get(), 
+                results["name"]+" "+results["surname"],
+                results["student_id"],
+                self.getQuizId()
+                )
             self.student_number = None
             self.code = None
+            self.tutor_code = None
             pop.destroy()
         except:
             messagebox.showwarning("", "An Error Occured! please try again")
-
 
     
     def displayAdmin(self):
         if (self.code is None):
             self.openAdminModal()
         else:
-            controlPrivileges(None, self.code)
+            controlPrivileges(None, self.code, None)
 
     def displayQuiz(self):
         if (self.student_number is None):
             self.openStudentModal()
         else:
-            controlPrivileges(self.student_number, None)
+            controlPrivileges(self.student_number, None, None)
+
+    def displayTutor(self):
+        if (self.tutor_code is None):
+            self.openTutorModal()
+        else:
+            controlPrivileges(None, None, self.tutor_code)
+
+
+
+
+
+
+
+
+
+
+class TutorScreen:
+    def __init__(self,window,frame):
+        self.window = window
+        self.frame = frame
+        self.titleFrame=tkinter.LabelFrame(self.frame,text="TUTORS ACTIONS",borderwidth=2, font=("Tahoma", 15),fg="black")
+        self.titleFrame.grid(row=0,column=0,sticky="W",padx=[10,0],pady=20,ipadx=[10])
+        self.placeholderArray = ['','','','','']
+        for i in range(0,5):
+            self.placeholderArray[i]=tkinter.StringVar()
+        self.categoryArray=[]
+        self.categoryArray1=[]
+        self.quizz = Quizz().getQuizz()
+        self.quizzArray = []
+        print("ALL QUIIZ DATA: ",self.quizz)
+        for quizz in self.quizz:
+            if(isinstance(Question().getQuestionByQuizId(quizz['id']), list)):
+                self.quizzArray.append(quizz)
+        for i in range(0, len(self.quizzArray)):
+                self.categoryArray.append(self.quizzArray[i]['title'])
+                self.categoryArray1.append({'quizz_id':self.quizzArray[i]['id'], 'quizz_title':self.quizzArray[i]['title']})
+        self.quizLabel=Label(self.titleFrame,text="Select Quizz",anchor="e",width=15,font=("Tahoma", 15))
+        self.logoutBtn=Button(self.titleFrame,text="DISCONNECT",width=25,borderwidth=3,bg=btnColor,fg='white',height=2,command=self.disconnectTutor, cursor="hand2")
+        self.quizCombo=ttk.Combobox(self.titleFrame,width=68,textvariable=self.placeholderArray[1],values=self.categoryArray,font=('Verdana',15))
+
+        self.quizLabel.grid(row=0,column=1,padx=[10,0],pady=5)
+        self.quizCombo.grid(row=0,column=2,padx=5,pady=2)
+        self.logoutBtn.grid(row=0,column=3,padx=[10,0],pady=5)
+        
+    def disconnectTutor(self):
+        frame3.pack_forget()
+        frame1.pack()
+        controlPrivileges()
+
+
+
+
+
+
+
+
+
+
 
 class QuizScreen:
-    def __init__(self,window,frame,quiz,sname,quiz_id):
+    def __init__(self,window,frame,quiz,sname,sid,quiz_id):
         self.window = window
         self.frame = frame
         self.quizz = quiz
         self.sname = sname
+        self.sid = sid
         self.quiz_id = quiz_id
+        self.image = Image.open("C:/Users/pc/Documents/projetPython/frontendQuizz/view/imgquizz.png")
+        self.bg = ImageTk.PhotoImage(self.image)
+        self.canvas = Canvas(self.frame, width=1500, height=900, bg="#d0d2d6")
+        self.canvas.grid(row=0, column=0, rowspan=200, columnspan=1000)
+        self.canvas.create_image(0, 0, anchor=NW, image=self.bg)
+        self.placeholderCorrectArray = ['','','','','','']
+        for i in range(0,6):
+            self.placeholderCorrectArray[i]=IntVar()
         self.questions1 = Question().getQuestion()
         self.questions = []
         self.options = []
         self.dict_questions = {}
-
+        self.placeholderArray = []
         self.questions1 = Question().getQuestionByQuizId(self.quiz_id)
-        print("ANSWER -----",self.questions1)
+        self.opts = None
+        self.dictQroQuestion = {}
+        self.arrayAnswerDict = {}
         for question1 in self.questions1:
             answer = Answer().getAnswerByQuestionId(question1["id"])
-            self.dict_questions[f"{question1["question_text"]}"] = answer
+            if(question1['question_type'] == 'Q.R.O'):
+                self.dictQroQuestion[f"{question1["question_text"]}"] = answer[0]['id']
+                self.placeholderArray.append('')
+                answer = ""
+            if(isinstance(answer,list) or question1['question_type'] == "Q.R.O"):
+                self.dict_questions[f"{question1["question_text"]}"] = answer
         for key,value in self.dict_questions.items():
             self.questions.append(key)
             self.options.append(value)
+
+        self.answerQroEntry=Entry(self.frame,width=65,font=('Verdana',25)) 
+        for i in range(0,len(self.placeholderArray)):
+            self.placeholderArray[i]=tkinter.StringVar()
+            self.answerQroEntry['textvariable'] = self.placeholderArray[i]
+        self.vArray = []
+        self.v1 = IntVar(self.frame)
+        self.vArray.append(self.v1)
+        self.v2 = IntVar(self.frame)
+        self.vArray.append(self.v2)
+        self.v3 = IntVar(self.frame)
+        self.vArray.append(self.v3)
+        self.v4 = IntVar(self.frame)
+        self.vArray.append(self.v4)
+        self.v5 = IntVar(self.frame)
+        self.vArray.append(self.v5)
+        self.v6 = IntVar(self.frame)
+        self.vArray.append(self.v6)
         
-        self.v1 = StringVar(self.frame)
-        self.v2 = StringVar(self.frame)
-        self.v3 = StringVar(self.frame)
-        self.v4 = StringVar(self.frame)
-        self.titleFrame = LabelFrame(self.frame,text=str(self.sname).upper(),fg="Orange" ,font=('Verdana', 10),borderwidth=2, width=200,bg="#02577A")
+        self.titleFrame = LabelFrame(self.frame,text=str(self.sname).upper(),fg="black" ,font=('BahnschriftLight', 15),borderwidth=2,bg="white")
+        self.canvas.create_window(0,0, anchor="w", window=self.titleFrame)
        
-        self.title = Label(self.titleFrame, height=1, fg="black", font=('Verdana', 15),bg="#02577A", text=self.quizz, wraplength=500,)
-        self.disconnect = Button(self.titleFrame,text="DISCONNECT",width=20,borderwidth=3,bg=btnColor,fg='white',command=self.disconnect,cursor="hand2")
-       
-        self.question_label = Label(self.frame, height=4, width=50, fg="black", font=('Verdana', 20), text="hgvcg", wraplength=500, bg='#ddd')
-        self.option1 = Radiobutton(self.frame, bg="#fff", variable=self.v1, width=75, cursor="hand2", font=('Verdana', 13), command=lambda:self.checkAnswer(self.option1))
-        self.option2 = Radiobutton(self.frame, bg="#fff", variable=self.v2, width=75,cursor="hand2", font=('Verdana', 13), command=lambda:self.checkAnswer(self.option2))
-        self.option3 = Radiobutton(self.frame, bg="#fff", variable=self.v3, width=75,cursor="hand2", font=('Verdana', 13), command=lambda:self.checkAnswer(self.option3))
-        self.option4 = Radiobutton(self.frame, bg="#fff", variable=self.v4, width=75,cursor="hand2", font=('Verdana', 13), command=lambda:self.checkAnswer(self.option4))
-        
-        self.btn_next = Button(self.frame, text="Next Question >",cursor="hand2",bg="Orange", width=15, font=("Verdana", 15), command=self.displayNextQuestion)
+        self.title = Label(self.titleFrame, height=1, fg="black", font=('BahnschriftLight', 15), text="Quiz Title: "+self.quizz, wraplength=500,)
+        self.disconnect = Button(self.titleFrame,text="DISCONNECT",width=20,borderwidth=3, height=2, bg=btnColor, fg='black',command=self.disconnectStudent,cursor="hand2")
+        self.radioArray = []
+        self.question_label = Label(self.frame, height=5, width=80, fg="black", font=('Verdana', 20), text="hgvcg", wraplength=500, bg='#ddd')
+        self.option1 =  Checkbutton(self.frame,width=149, bg="#fff",
+                                   height=2,cursor="hand2", 
+                                   font=('BahnschriftLight', 13),fg="black" ,
+                                   activeforeground="darkgreen",highlightthickness=0,takefocus=0,
+                                   command=lambda:self.checkAnswer(self.option1,0),
+                                   variable=self.v1,
+                                   onvalue=1, offvalue=0)
+        self.radioArray.append(self.option1)
+        self.option2 =  Checkbutton(self.frame,width=149, bg="#fff",
+                                   height=2,cursor="hand2",command=lambda:self.checkAnswer(self.option2,1),
+                                   variable=self.v2,font=('BahnschriftLight', 13),fg="black",
+                                   activeforeground="darkgreen",highlightthickness=0,takefocus=0,
+                                   onvalue=1, offvalue=0)
+        self.radioArray.append(self.option2)
+        self.option3 =  Checkbutton(self.frame,width=149, bg="#fff",
+                                   height=2,cursor="hand2", command=lambda:self.checkAnswer(self.option3,2),
+                                   variable=self.v3,font=('BahnschriftLight', 13),fg="black",
+                                   activeforeground="darkgreen",highlightthickness=0,takefocus=0,
+                                   onvalue=1, offvalue=0)
+        self.radioArray.append(self.option3)
+        self.option4 =  Checkbutton(self.frame,width=149, bg="#fff",
+                                   height=2,cursor="hand2", command=lambda:self.checkAnswer(self.option4,3),
+                                   variable=self.v4,font=('BahnschriftLight', 13),fg="black",
+                                   activeforeground="darkgreen",highlightthickness=0,takefocus=0,
+                                   onvalue=1, offvalue=0)
+        self.radioArray.append(self.option4)
+        self.option5 =  Checkbutton(self.frame,width=149, bg="#fff",
+                                   height=2,cursor="hand2",  command=lambda:self.checkAnswer(self.option5,4),
+                                   variable=self.v5,font=('BahnschriftLight', 13),fg="black",
+                                   onvalue=1, offvalue=0)
+        self.radioArray.append(self.option5)
+        self.option6 =  Checkbutton(self.frame,width=149, bg="#fff",
+                                   height=2,cursor="hand2", command=lambda:self.checkAnswer(self.option6,5),
+                                   variable=self.v6,font=('BahnschriftLight', 13),fg="black",
+                                   activeforeground="darkgreen",highlightthickness=0,takefocus=0,
+                                   onvalue=1, offvalue=0)
+        self.radioArray.append(self.option6)
+
+      
+        self.btn_next = Button(self.frame, text="Next",cursor="hand2",bg=btnColor, width=25, font=("Verdana", 15), command=self.displayNextQuestion)
         self.frame.pack(fill="both", expand="true")
-        self.titleFrame.grid(row=0, column=0,padx=[0,10], pady=[2,2])
+        self.titleFrame.grid(row=0, column=0,padx=[0,0], pady=[2,2], columnspan=10)
         self.title.grid(row=0,column=0,padx=[0,450], pady=[5,0])
-        self.disconnect.grid(row=0,column=1, padx=[110,5],pady=[5,0])
-        self.question_label.grid(row=1, column=0,)
+        self.disconnect.grid(row=0,column=1, padx=[500,5],pady=[5,0])
+        self.question_label.grid(row=1, column=0,pady=[5,25])
 
-        self.option1.grid(sticky="W", row=2, column=0, pady=10)
-        self.option2.grid(sticky="W", row=3, column=0, pady=10)
-        self.option3.grid(sticky="W", row=4, column=0, pady=10)
-        self.option4.grid(sticky="W", row=5, column=0, pady=10)
-
-        self.btn_next.grid(row=6, column=0,pady=[10,0])
+        self.option1.grid(sticky="W", row=2, column=0, pady=2)
+        self.option2.grid(sticky="W", row=3, column=0, pady=2)
+        self.option3.grid(sticky="W", row=4, column=0, pady=2)
+        self.option4.grid(sticky="W", row=5, column=0, pady=2)
+        self.option5.grid(sticky="W", row=6, column=0, pady=2)
+        self.option6.grid(sticky="W", row=7, column=0, pady=2)
+       
+        self.btn_next.grid(row=8, column=0,pady=[10,0])
         self.displayNextQuestion()
         print(self.correct)
 
-        
+
+    def displayOption(self):
+        if(isinstance(self.options[self.index], list)):
+            self.opts = self.options[self.index]
+        else:
+            self.opts = []
+        if(len(self.opts) != 0):
+            for i in range(0,6):
+                rows = 2
+                if i==0:
+                    rows=2
+                elif i==1:
+                    rows=3
+                elif i==2:
+                    rows=4
+                elif i==3:
+                    rows=5
+                elif i==4:
+                    rows=6
+                elif i==5:
+                    rows=7
+                if(self.opts[i]['answer_text'] != ""):
+                    self.radioArray[i].grid(sticky="W", row=rows, column=0, pady=10)
+                    self.radioArray[i]['text'] = self.opts[i]['answer_text']
+                    self.vArray[i].set(self.opts[i]['answer_text'])
+                else:
+                    self.radioArray[i].grid_forget()
+        else:
+            for i in range(0,len(self.radioArray)):
+                self.radioArray[i].grid_forget()
+            self.answerQroEntry.grid(sticky="W", row=2, column=0, columnspan=25, pady=10)
     index = 0
     correct = 0
-    def disconnect(self):
+    lenCheck = 0
+    correct1 = 0
+
+    def disconnectStudent(self):
+        frame2.pack_forget()
+        frame1.pack()
         controlPrivileges()
+
     def disableButton(self, state):
         self.option1['state'] = state
         self.option2['state'] = state
         self.option3['state'] = state
         self.option4['state'] = state
+        self.option5['state'] = state
+        self.option6['state'] = state
 
-    def checkAnswer(self,radio):
-        global correct, index
+    def checkAnswer(self,radio,id):
+        global correct, index, lenCheck
+        self.lenCheck += 1
+        if(self.lenCheck == 2):
+            self.disableButton('disable')
         for option in self.options[self.index]:
-            if radio['text'] == option['answer_text'] and option['is_correct'] == 1:
-                self.correct += 1
-        self.index += 1
-        self.disableButton('disable')
+            if radio['text'] == option['answer_text']:
+                if self.vArray[id].get() == 1:
+                    self.arrayAnswerDict[f"{option['answer_text']}"] = option['id']
+                    if option['is_correct'] == 1:
+                        self.correct += 1
+
+    def resetPlaceholder(self):
+        for i in range(0,len(self.placeholderArray)): 
+                self.placeholderArray[i].set('')
 
     def displayNextQuestion(self):
-        global correct, index
+        global correct, index, lenCheck, correct1
+        op = ""
+        st1Array = []
+        studentAnswerArray = StudentAnswer().getStudentByAnswerId(self.sid)
+        if(len(studentAnswerArray) != 0):
+            print("ST ARRAY------- --- ",studentAnswerArray)
+            for st in studentAnswerArray:
+                print("ST------- --- ",st)
+                st1 = StudentAnswer().getStudentAnswersById(self.sid, st['id'])['correct']
+                if st1 is not None:
+                    st1Array.append(st1)
+                if st['is_correct'] == 1 or st1 == "is_true":
+                    self.correct1 += 1
+            self.btn_next['state'] = 'disabled'
+            for i in range(0, len(self.radioArray)):
+                self.radioArray[i].grid_forget() 
+            print("st1Array : ",st1Array)
+            if(len(st1Array) == 0):
+                op = "Partial Result "
+            else:
+                op = "Final Result "
+            result = op + str(self.correct1) + " / " + str(len(studentAnswerArray))+"\n"+str(round((((self.correct1)/len(studentAnswerArray))*100),2))+"%"
 
-        if self.btn_next['text'] == 'Restart The Quiz':
-            self.correct = 0
-            self.index = 0
-            self.question_label['bg'] = '#ddd'
-            self.btn_next['text'] = 'Next'
-
-        if self.index == len(self.options):
-            self.question_label['text'] = "Result: "+ str(self.correct) + " / " + str(len(self.options))+"\n"+str(round((((self.correct)/len(self.options))*100),2))+"%"
+            self.question_label['text'] = result
             self.question_label['bg'] = 'green'
             self.btn_next['width'] = 20
             self.btn_next['text'] = 'Restart The Quiz'
-            if self.correct >= len(self.options)/2:
+            if self.correct1 >= len(studentAnswerArray)/2:
                 self.question_label['bg'] = "green"
             else:
                 self.question_label['bg'] = "red"
-
         else:
-            self.question_label['text'] = self.questions[self.index]
+            print("Question Legnt ",len(self.questions), " INDEX: ", self.index)
+            if(self.answerQroEntry.get() != '' or self.lenCheck == 2 or self.lenCheck == 1):
+                if(len(self.questions) == self.index):
+                    self.index  = 0
+                if(self.options[self.index] == ""):
+                    print("DICT QRO QUESTION :", self.dictQroQuestion);
+                    for key,value in self.dictQroQuestion.items():
+                        if(self.questions[self.index] == key):
+                            self.arrayAnswerDict[f"Q.R.O-{self.answerQroEntry.get()}"] = value
+                self.index += 1 
+            if self.btn_next['text'] == 'Restart The Quiz':
+                self.resetPlaceholder()
+                self.correct = 0
+                self.index = 0
+                self.lenCheck = 0
+                self.question_label['bg'] = '#ddd'
+                self.btn_next['text'] = 'Next'
 
-            self.disableButton('normal')
-            opts = self.options[self.index]
-            self.option1['text'] = opts[0]['answer_text']
-            self.option2['text'] = opts[1]['answer_text']
-            self.option3['text'] = opts[2]['answer_text']
-            self.option4['text'] = opts[3]['answer_text']
+            if self.index == len(self.options):
+                for key,value in self.arrayAnswerDict.items():
+                    if(key.split("-")[0] == "Q.R.O"):
+                        StudentAnswer(self.sid, value, key.split("-")[1], 0).createStudentsAnswers()
+                    else:
+                        StudentAnswer(self.sid, value, "", 0).createStudentsAnswers()
+                self.resetPlaceholder()
 
-            self.v1.set(opts[0]['answer_text'])
-            self.v2.set(opts[1]['answer_text']) 
-            self.v3.set(opts[2]['answer_text'])
-            self.v4.set(opts[3]['answer_text'])
+                result = "Result: "+ str(self.correct) + " / " + str(len(self.options))+"\n"+str(round((((self.correct)/len(self.options))*100),2))+"%"
+                for op in self.options:
+                    if(op == ""):
+                        result = "Partial "+result+"\n Please wait 24 hours for final results"
+                        break
+                self.question_label['text'] = result
+                self.question_label['bg'] = 'green'
+                self.btn_next['width'] = 20
+                self.btn_next['text'] = 'Restart The Quiz'
+                if self.correct >= len(self.options)/2:
+                    self.question_label['bg'] = "green"
+                else:
+                    self.question_label['bg'] = "red"
 
-            if self.index == len(self.options)-1:
-                self.btn_next['text'] = 'Check Result'
+            else:
+                self.lenCheck = 0
+                self.question_label['text'] = self.questions[self.index]
+                self.disableButton('normal')
+                self.displayOption()
 
+                if self.index == len(self.options)-1:
+                    self.btn_next['text'] = 'Save'
+                self.resetPlaceholder()
 
-    def displayAdmin(self):
-        print("ADMIN SYSTEM")
-        controlPrivileges(None, 125)
-
-    def displayQuiz(self):
-        print("QUIZ SYSTEM")
-        controlPrivileges(2, None)
 
 
 async def main():

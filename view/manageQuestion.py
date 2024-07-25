@@ -61,8 +61,6 @@ class ManageQuestion:
                 if(self.countQuestion < 2):
                     self.countQuestion = 0
                 self.countQuestionLabel['text'] = str(self.countQuestion)+" questions"
-                
-        
         self.categoryCombo.bind("<<ComboboxSelected>>", self.displayCountQuestion)
 
         self.manageActionQuestion=tkinter.LabelFrame(self.entriesFrameQuestion,text="ACTIONS QUESTION",borderwidth=5,font=("Tahoma", 15),fg="black")
@@ -109,6 +107,8 @@ class ManageQuestion:
         for cat1 in self.categoryArray1:
             if(self.categoryCombo.get() == cat1['quizz_title']):
                 return cat1['quizz_id']
+    def resetQuestionCombo(self, event):
+        self.placeholderArray[0].set('')
     def save(self):
         question_text=str(self.questionTextEntry.get())
         question_type=str(self.typeQuestionCombo.get())
@@ -118,6 +118,9 @@ class ManageQuestion:
         if  not(question_text) or not(quizz_id):
             messagebox.showwarning("","Please fill up all entries")
             return
+        if(question_type == "Q.R.O"):
+           question_id =  Question(question_text,question_type,quizz_id).createQuestion()['id']
+           Answer("",0,question_id).createAnswer()
         Question(question_text,question_type,quizz_id).createQuestion()
         self.countQuestion = len(Question().getQuestionByQuizId(self.getQuizId()))
         self.countQuestionLabel['text'] = str(self.countQuestion)+" questions"
@@ -142,6 +145,9 @@ class ManageQuestion:
         if  not(question_text) or not(quizz_id):
             messagebox.showwarning("","Please fill up all entries")
             return
+        if(question_type == "Q.R.O"):
+            answer = Answer().getAnswerByQuestionId(selectedItemId)[0]
+            Answer("",0,selectedItemId).updateAnswer(answer['id'])
         Question(question_text,question_type,quizz_id).updateQuestion(selectedItemId)
         self.setph('',0)
         self.saveBtn['state']='active'
@@ -157,8 +163,6 @@ class ManageQuestion:
             question_type = str(self.my_tree.item(selectedItem)['values'][2])
             quizz_text = Quizz().getQuizzById(quizz_id)["title"]
             countAnswer = len(Answer().getAnswerByQuestionId(question_id))
-            if(countAnswer >= 2):
-                self.deleteBtn['state']='disabled'
             self.setph(question_text,0)
             self.setph(quizz_text,1)
             self.setph(question_type,2)
@@ -178,6 +182,10 @@ class ManageQuestion:
                     selectedItem = self.my_tree.selection()[0]
                     itemId = str(self.my_tree.item(selectedItem)['values'][0])
                     try:
+                        if(len(Answer().getAnswerByQuestionId(itemId)) != 0):
+                            for i in Answer().getAnswerByQuestionId(itemId):
+                                answerId = i['id']
+                                Answer().deleteAnswer(answerId)
                         Question().deleteQuestion(itemId)
                         messagebox.showinfo("","Data has been successfully deleted")
                         self.typeQuestionCombo.current(0)

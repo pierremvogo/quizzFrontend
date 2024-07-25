@@ -2,11 +2,10 @@ import requests
 
 
 class Answer(object):
-    def __init__(self, answer_text="", is_correct=False, question_id=0, student_id=0):
+    def __init__(self, answer_text="", is_correct=False, question_id=None):
         self.answer_text = answer_text
         self.is_correct = is_correct
         self.question_id = question_id
-        self.student_id = student_id
     
     def getAnswer(self):
         try:
@@ -58,7 +57,8 @@ class Answer(object):
         payload = {
             "answer_text" :  self.answer_text, 
             "is_correct" :   self.is_correct,
-            "question_id" : self.question_id
+            "question_id" : self.question_id,
+            
         }
         headers = {"Content-type": "application/json" }
         try:

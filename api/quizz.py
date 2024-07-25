@@ -38,6 +38,14 @@ class Quizz(object):
         except requests.ConnectionError as err:
             print(err)
 
+    def getQuizzHasQuestions(self):
+        try:
+            response  =  requests.get(f"http://localhost:8080/api/quizzs/getHasQuestion")
+            print(response.json())
+            return response.json()
+        except requests.ConnectionError as err:
+            print(err)
+
     def deleteQuizz(self, id):
         try:
             response  =  requests.delete(f"http://localhost:8080/api/quizzs/delete/{id}")
