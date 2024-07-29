@@ -40,6 +40,14 @@ class Question(object):
         except requests.ConnectionError as err:
             print(err)
 
+    def getQuestionByStudent(self, id):
+        try:
+            response  =  requests.get(f"http://localhost:8080/api/studentsAnswers/getQuestionByStudent/{id}")
+            print(response.json())
+            return response.json()
+        except requests.ConnectionError as err:
+            print(err)
+
     def deleteQuestion(self, id):
         try:
             response  =  requests.delete(f"http://localhost:8080/api/questions/delete/{id}")

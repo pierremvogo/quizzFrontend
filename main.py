@@ -268,6 +268,7 @@ class MainScreen:
             controlPrivileges(
                 self.student_number,
                 None, 
+                None,
                 self.quizCombo.get(), 
                 results["name"]+" "+results["surname"],
                 results["student_id"],
@@ -313,28 +314,109 @@ class TutorScreen:
         self.window = window
         self.frame = frame
         self.titleFrame=tkinter.LabelFrame(self.frame,text="TUTORS ACTIONS",borderwidth=2, font=("Tahoma", 15),fg="black")
-        self.titleFrame.grid(row=0,column=0,sticky="W",padx=[10,0],pady=20,ipadx=[10])
+        self.titleFrame.grid(row=0,column=0,sticky="W", columnspan=10, padx=[10,0],pady=20,ipadx=[10])
         self.placeholderArray = ['','','','','']
         for i in range(0,5):
             self.placeholderArray[i]=tkinter.StringVar()
+        self.categoryStudent = []
+        self.categoryStudent1 = []
+        self.studentArray=[]
+
         self.categoryArray=[]
         self.categoryArray1=[]
         self.quizz = Quizz().getQuizz()
+        self.studentHasAnswer = StudentAnswer().getStudentByAnswerId1()
         self.quizzArray = []
-        print("ALL QUIIZ DATA: ",self.quizz)
-        for quizz in self.quizz:
-            if(isinstance(Question().getQuestionByQuizId(quizz['id']), list)):
-                self.quizzArray.append(quizz)
-        for i in range(0, len(self.quizzArray)):
-                self.categoryArray.append(self.quizzArray[i]['title'])
-                self.categoryArray1.append({'quizz_id':self.quizzArray[i]['id'], 'quizz_title':self.quizzArray[i]['title']})
-        self.quizLabel=Label(self.titleFrame,text="Select Quizz",anchor="e",width=15,font=("Tahoma", 15))
-        self.logoutBtn=Button(self.titleFrame,text="DISCONNECT",width=25,borderwidth=3,bg=btnColor,fg='white',height=2,command=self.disconnectTutor, cursor="hand2")
-        self.quizCombo=ttk.Combobox(self.titleFrame,width=68,textvariable=self.placeholderArray[1],values=self.categoryArray,font=('Verdana',15))
+        self.answerArray = []
 
-        self.quizLabel.grid(row=0,column=1,padx=[10,0],pady=5)
-        self.quizCombo.grid(row=0,column=2,padx=5,pady=2)
+        for student in self.studentHasAnswer:
+            if(Student().getStudentById(student['student_id']) is not None):
+                stud = Student().getStudentById(student['student_id'])
+                self.studentArray.append(stud)
+        for i in range(0, len(self.studentArray)):
+            self.categoryStudent.append(self.studentArray[i]['name']+" "+self.studentArray[i]['surname'])
+            self.categoryStudent1.append({'student_id':self.studentArray[i]['student_id'], 'student_name':self.studentArray[i]['name']+" "+self.studentArray[i]['surname']})
+        
+        self.questionLabel=Label(self.titleFrame,text="Select Question",anchor="e",width=15,font=("Tahoma", 15))
+        self.questionCombo=ttk.Combobox(self.titleFrame,width=68,textvariable=self.placeholderArray[1],values=self.categoryArray,font=('Verdana',15))
+
+        self.studentLabel=Label(self.titleFrame,text="Select Student",anchor="e",width=15,font=("Tahoma", 15))
+        self.studentCombo=ttk.Combobox(self.titleFrame,width=68,textvariable=self.placeholderArray[2],values=self.categoryStudent,font=('Verdana',15))
+
+        self.logoutBtn=Button(self.titleFrame,text="DISCONNECT",width=25,borderwidth=3,bg=btnColor,fg='white',height=2,command=self.disconnectTutor, cursor="hand2")
+        self.placeholderCorrectArray = ['','']
+        for i in range(0,1):
+            self.placeholderCorrectArray[i]=IntVar()
+
+        self.saveBtn=Button(self.titleFrame,text="SAVES",width=25,borderwidth=3,fg='black',height=2,command=self.save,cursor="hand2")
+
+        self.isCorrect1=Checkbutton(self.titleFrame,width=2, 
+                                   variable=self.placeholderCorrectArray[0],
+                                   onvalue=1, offvalue=0)
+        
+        self.answerText1Label=Label(self.titleFrame,text="Answer",anchor="e",width=15,font=("Tahoma", 15))
+        self.answerText1Label.grid(row=5,column=1,padx=0)
+        self.answerText1Entry=Entry(self.titleFrame,width=68,textvariable=self.placeholderArray[0], font=('Verdana',15))
+        self.answerText1Entry.grid(row=5,column=2,padx=0,pady=10)
+        self.isCorrect1.grid(row=5,column=3,padx=0,pady=2)
+        self.saveBtn.grid(row=6,column=2,padx=0,pady=2)
+
+
+        self.questionLabel.grid(row=1,column=1,padx=[10,0],pady=5)
+        self.questionCombo.grid(row=1,column=2,padx=5,pady=2)
+        self.studentLabel.grid(row=0, column=1,padx=5,pady=2)
+        self.studentCombo.grid(row=0, column=2,padx=5,pady=2)
         self.logoutBtn.grid(row=0,column=3,padx=[10,0],pady=5)
+
+        self.studentCombo.bind("<<ComboboxSelected>>", self.loadQuestion)
+        self.questionCombo.bind("<<ComboboxSelected>>", self.loadAnswer)
+
+    def save(self):
+        try:
+            student_id = int(self.getStudentId())
+            answer_id = 0
+            correct = ""
+            answer_text = str(self.answerText1Entry.get())
+            is_correct = self.placeholderCorrectArray[0].get()
+            if(is_correct == 0):
+                correct = "is_false"
+            else:
+                correct = "is_true"
+            for answer in self.categoryArray1:
+                if(answer_text == answer['question_answer']):
+                    answer_id = answer['answer_id']
+            print(student_id, answer_id,correct, answer_text, is_correct)
+            StudentAnswer(student_fkid=student_id, answer_fkid=answer_id, answer_text_fk=answer_text, is_correct=correct).updateStudentAnswer()     
+            print("student : ")
+        except:
+            messagebox.showwarning("", "An error occured please try again")
+            return
+
+    def loadQuestion(self,event):
+            self.question = Question().getQuestionByStudent(self.getStudentId())
+            self.categoryArray = []
+            self.categoryArray1 = []
+            self.placeholderArray[1].set('')
+            if(self.question is not None):
+                for question in self.question:
+                    self.categoryArray.append(question['question_text'])
+                    self.categoryArray1.append({'answer_id':question['answer_fkid'],'question_text':question['question_text'], 'question_answer':question['answer_text_fk']})
+            self.questionCombo["values"] = self.categoryArray
+
+    def loadAnswer(self, event):
+        print(self.categoryArray1)
+        answer = ""
+        for answ in self.categoryArray1:
+            if(self.questionCombo.get() == answ['question_text']):
+                answer = answ['question_answer']
+        self.placeholderArray[0].set(answer)
+
+
+    
+    def getStudentId(self):
+        for cat1 in self.categoryStudent1:
+            if(self.studentCombo.get() == cat1['student_name']):
+                return cat1['student_id']
         
     def disconnectTutor(self):
         frame3.pack_forget()
@@ -544,16 +626,19 @@ class QuizScreen:
             print("ST ARRAY------- --- ",studentAnswerArray)
             for st in studentAnswerArray:
                 print("ST------- --- ",st)
-                st1 = StudentAnswer().getStudentAnswersById(self.sid, st['id'])['correct']
-                if st1 is not None:
-                    st1Array.append(st1)
-                if st['is_correct'] == 1 or st1 == "is_true":
+                st1 = StudentAnswer().getStudentAnswersById(self.sid, st['id'])
+                st1Array.append(st1)
+                if st['is_correct'] == 1 or st1['correct'] == "is_true":
                     self.correct1 += 1
             self.btn_next['state'] = 'disabled'
             for i in range(0, len(self.radioArray)):
-                self.radioArray[i].grid_forget() 
-            print("st1Array : ",st1Array)
-            if(len(st1Array) == 0):
+                self.radioArray[i].grid_forget()
+            print("ST1 ARRAY", st1Array)
+            strr = []
+            for str1 in st1Array:
+                if(str1['answer_text_fk'] != "" and str1['correct'] is None):
+                    strr.append(str1)
+            if(len(strr) != 0):
                 op = "Partial Result "
             else:
                 op = "Final Result "
@@ -562,7 +647,7 @@ class QuizScreen:
             self.question_label['text'] = result
             self.question_label['bg'] = 'green'
             self.btn_next['width'] = 20
-            self.btn_next['text'] = 'Restart The Quiz'
+            self.btn_next['text'] = 'Refresh'
             if self.correct1 >= len(studentAnswerArray)/2:
                 self.question_label['bg'] = "green"
             else:

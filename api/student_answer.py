@@ -32,6 +32,15 @@ class StudentAnswer(object):
         except requests.ConnectionError as err:
             print(err)
 
+    def getStudentByAnswerId1(self):
+        try:
+            response  =  requests.get(f"http://localhost:8080/api/studentsAnswers/getByAnswerId1")
+            print(response.json())
+            return response.json()
+        except requests.ConnectionError as err:
+            print(err)
+
+
     def deleteStudentAnswer(self, student_fkid,answer_fkid):
         try:
             response  =  requests.get(f"http://localhost:8080/api/studentsAnswers/delete/{student_fkid}/{answer_fkid}")
@@ -55,16 +64,13 @@ class StudentAnswer(object):
         except requests.ConnectionError as err:
             print(err)
 
-    def updateStudentAnswer(self, id):
+    def updateStudentAnswer(self):
         payload = {
-            "student_fkid": self.student_fkid,
-            "answer_fkid": self.answer_fkid,
-            "answer_text_fk": self.answer_text_fk,
-            "is_correct": self.is_correct
+            "correct": self.is_correct
         }
         headers = {"Content-type": "application/json" }
         try:
-            response  =  requests.put(f"http://localhost:8080/api/studentsAnswers/update/{id}", json=payload, headers=headers)
+            response  =  requests.put(f"http://localhost:8080/api/studentsAnswers/update/{self.student_fkid}/{self.answer_fkid}", json=payload, headers=headers)
             print(response.json())
             return response.json()
         except requests.ConnectionError as err:
