@@ -621,6 +621,7 @@ class QuizScreen:
         global correct, index, lenCheck, correct1
         op = ""
         st1Array = []
+        checkArray = []
         studentAnswerArray = StudentAnswer().getStudentByAnswerId(self.sid)
         if(len(studentAnswerArray) != 0):
             print("ST ARRAY------- --- ",studentAnswerArray)
@@ -629,8 +630,11 @@ class QuizScreen:
                 st1 = StudentAnswer().getStudentAnswersById(self.sid, st['id'])
                 st1Array.append(st1)
                 if st['is_correct'] == 1 or st1['correct'] == "is_true":
-                    self.correct1 += 1
-            self.btn_next['state'] = 'disabled'
+                    if(self.btn_next['text'] == 'Refresh'):
+                        checkArray.append("")
+                    else:
+                        self.correct1 += 1
+            self.btn_next['state'] = 'active'
             for i in range(0, len(self.radioArray)):
                 self.radioArray[i].grid_forget()
             print("ST1 ARRAY", st1Array)
@@ -642,6 +646,8 @@ class QuizScreen:
                 op = "Partial Result "
             else:
                 op = "Final Result "
+            if(self.btn_next['text'] == 'Refresh'):
+                self.correct1 = len(checkArray)
             result = op + str(self.correct1) + " / " + str(len(studentAnswerArray))+"\n"+str(round((((self.correct1)/len(studentAnswerArray))*100),2))+"%"
 
             self.question_label['text'] = result
